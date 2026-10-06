@@ -1,142 +1,68 @@
 import numpy as np
 from numpy.typing import NDArray
 
+Matrix = NDArray[np.float64]
 
-def cross_validation_train(
-    test_datasets: int,
-    X: NDArray,
-    Y: NDArray,
-    X_train: list = [],  # noqa: B006
-    Y_train: list = [],  # noqa: B006
-    X_test: list = [],  # noqa: B006
-    Y_test: list = [],  # noqa: B006
-    start_idx: int = 0,
-) -> tuple[NDArray, float, float]:
-    """Pick a specified number of datasets for testing, use others for training, choose the best weights based on their training errors and test errors"""
+def train(X: Matrix, Y: Matrix):
+    """X @ w ~ Y"""
+    return np.linalg.lstsq(X, Y)[0]
 
-    if test_datasets == 0:
-        pop_cnt = len(X) - start_idx
-        while start_idx < len(X):
-            # Add remaining datasets to training sets
-            X_train.append(X[start_idx])
-            Y_train.append(Y[start_idx])
+def mse(w: Matrix, X: Matrix, Y: Matrix):
+    return np.mean((Y - X @ w) ** 2)
 
-            start_idx += 1
+def evaluate(x: Matrix, w: Matrix):
+    return x @ w
 
-        X_train_array = np.array(X_train)
-        Y_train_array = np.array(Y_train)
+def k_fold(k: int, X: Matrix, Y: Matrix, seed: int | None = None):
+  indices = np.arange(len(Y))
+  np.random.default_rng(seed).shuffle(indices)
 
-        w = train(X_train_array, Y_train_array)
+  folds = np.array_split(indices, k)
 
-        # Reset training set
-        while pop_cnt > 0:
-            X_train.pop()
-            Y_train.pop()
+  total_error = np.float64(0)
 
-            pop_cnt -= 1
+  for i in range(k):
+    train_indices = np.concat([folds[j] for j in range(k) if j != i])
+    w = train(X[train_indices], Y[train_indices])
 
-        return (
-            w,
-            # Training cost
-            cost(w, X_train_array, Y_train_array),
-            # Test cost
-            cost(w, np.array(X_test), np.array(Y_test)),
-        )
+    test_indices = folds[i];
+    total_error += mse(w, X[test_indices], Y[test_indices])
 
-    remaining_tests = test_datasets - 1
+  return total_error / k
 
-    # First case
-    X_test.append(X[start_idx])
-    Y_test.append(Y[start_idx])
-    optimal_pair = cross_validation_train(
-        remaining_tests, X, Y, X_train, Y_train, X_test, Y_test, start_idx + 1
+if __name__ == '__main__':
+    # Predict rent price of a house based on area and distance from city center
+    datasets = [
+        [[20, 5], 6],
+        [[30, 4], 10],
+        [[17, 6], 3],
+        [[25, 4], 8],
+        [[27, 6], 7],
+        [[23, 8], 4],
+        [[19, 6], 5],
+        [[35, 3], 13],
+        [[42, 2], 17],
+        [[28, 7], 6],
+        [[50, 5], 14],
+        [[32, 9], 7],
+        [[45, 4], 15],
+        [[22, 10], 4],
+        [[38, 6], 11],
+        [[55, 3], 19],
+        [[26, 5], 7],
+        [[60, 8], 14],
+        [[33, 2], 12],
+        [[48, 7], 12],
+    ]
+    X = np.array([d[0] for d in datasets], dtype=np.float64)
+    Y = np.array([d[1] for d in datasets], dtype=np.float64)
+
+    w = train(X, Y)
+    print('mse:', mse(w, X, Y))
+    print('k-fold mse:', k_fold(5, X, Y))
+
+    x = np.array(
+        [float(input("area (m^2): ")), float(input("distance from city center (km): "))],
+        dtype=np.float64
     )
-
-    cur_idx = start_idx + 1
-    pop_cnt = len(X) - test_datasets - cur_idx
-    while cur_idx < len(X) - test_datasets:
-        # Swap the current set as test set
-        X_test[-1] = X[cur_idx]
-        Y_test[-1] = Y[cur_idx]
-
-        # Add previous case as a training set
-        X_train.append(X[cur_idx - 1])
-        Y_train.append(Y[cur_idx - 1])
-
-        # Pick weights
-        result_pair = cross_validation_train(
-            remaining_tests,
-            X,
-            Y,
-            X_train,
-            Y_train,
-            X_test,
-            Y_test,
-            cur_idx + 1,
-        )
-
-        # TODO: better selection maybe?
-        if result_pair[1] < optimal_pair[1] and result_pair[2] <= optimal_pair[2]:
-            optimal_pair = result_pair
-
-        cur_idx += 1
-
-    # Reset testing set
-    X_test.pop()
-    Y_test.pop()
-
-    # Reset training set
-    while pop_cnt > 0:
-        X_train.pop()
-        Y_train.pop()
-
-        pop_cnt -= 1
-
-    return optimal_pair
-
-
-def train(X: NDArray, Y: NDArray):
-    return np.linalg.multi_dot([np.linalg.pinv(np.dot(X.T, X)), X.T, Y])
-
-
-def evaluate(x: NDArray, w: NDArray):
-    return np.inner(x, w)
-
-
-def cost(w: NDArray, X: NDArray, Y: NDArray) -> float:
-    return np.linalg.norm(Y - X.dot(w), 2) / len(w)
-
-# Predict rent price of a house based on area and distance from city center
-datasets = [
-    [[20, 5], 6],
-    [[30, 4], 10],
-    [[17, 6], 3],
-    [[25, 4], 8],
-    [[27, 6], 7],
-    [[23, 8], 4],
-    [[19, 6], 5],
-    [[35, 3], 13],
-    [[42, 2], 17],
-    [[28, 7], 6],
-    [[50, 5], 14],
-    [[32, 9], 7],
-    [[45, 4], 15],
-    [[22, 10], 4],
-    [[38, 6], 11],
-    [[55, 3], 19],
-    [[26, 5], 7],
-    [[60, 8], 14],
-    [[33, 2], 12],
-    [[48, 7], 12],
-]
-X = np.array([d[0] for d in datasets])
-Y = np.array([d[1] for d in datasets])
-
-(w, training_cost, test_cost) = cross_validation_train(4, X, Y)
-print("training cost:", training_cost)
-print("test cost:", test_cost)
-
-x = np.array(
-    [float(input("area (m^2): ")), float(input("distance from city center (km): "))]
-)
-print("predicted price:", evaluate(x, w))
+    print("predicted price:", evaluate(x, w))
