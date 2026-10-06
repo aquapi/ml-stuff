@@ -10,10 +10,10 @@ def train(X: Matrix, Y: Matrix):
 def mse(w: Matrix, X: Matrix, Y: Matrix):
     return np.mean((Y - X @ w) ** 2)
 
-def evaluate(x: Matrix, w: Matrix):
+def predict(x: Matrix, w: Matrix):
     return x @ w
 
-def k_fold(k: int, X: Matrix, Y: Matrix, seed: int | None = None):
+def k_fold_mse(k: int, X: Matrix, Y: Matrix, seed: int | None = None):
   indices = np.arange(len(Y))
   np.random.default_rng(seed).shuffle(indices)
 
@@ -59,10 +59,10 @@ if __name__ == '__main__':
 
     w = train(X, Y)
     print('mse:', mse(w, X, Y))
-    print('k-fold mse:', k_fold(5, X, Y))
+    print('k-fold mse:', k_fold_mse(5, X, Y))
 
     x = np.array(
         [float(input("area (m^2): ")), float(input("distance from city center (km): "))],
         dtype=np.float64
     )
-    print("predicted price:", evaluate(x, w))
+    print("predicted price:", predict(x, w))
