@@ -48,11 +48,11 @@ def k_fold(
 def select_regularization(
     k: int, X: Matrix, Y: Matrix, regularizations: Matrix
 ) -> float64:
-    errors = np.array(
-        [k_fold(k, X, Y, regularization) for regularization in regularizations]
-    )
-
-    return regularizations[np.argmin(errors)]
+    return regularizations[
+        np.argmin(
+            [k_fold(k, X, Y, regularization) for regularization in regularizations]
+        )
+    ]
 
 
 X = train_features(datasets)
