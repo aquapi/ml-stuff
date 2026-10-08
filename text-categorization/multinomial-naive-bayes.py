@@ -32,9 +32,9 @@ if __name__ == "__main__":
     (bow, X) = bow_train_features(datasets)
     print("bag of words:", bow)
 
-    w = train(X)
-    print("weights:", w)
+    W = train(X)
+    print("weights:", W)
 
     x = bow_input_features(bow, input("text: "))
-    print("input features:", w)
-    print("label:", predict(w, x))
+    print("input features:", W)
+    print("label:", predict(W, x))
