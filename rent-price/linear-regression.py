@@ -25,14 +25,6 @@ if __name__ == "__main__":
     print("weights:", w)
     print("error:", np.exp(error(w, X, Y)))
 
-    print(
-        "predicted price:",
-        np.exp(
-            predict(
-                w,
-                input_features(
-                    input("area (m^2): "), input("distance from city center (km): ")
-                ),
-            )
-        ),
-    )
+    x = input_features(input("area (m^2): "), input("distance from city center (km): "))
+    print("input features:", x)
+    print("predicted price:", np.exp(predict(w, x)))

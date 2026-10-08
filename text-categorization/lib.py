@@ -21,7 +21,7 @@ def bow_train_features(datasets: list[tuple[str, int]]):
 
     # setup vocabulary
     for dataset in datasets:
-        for word in dataset[0].split(" "):
+        for word in dataset[0].split():
             if word not in bow:
                 bow_size += 1
                 bow[word] = bow_size
@@ -35,7 +35,7 @@ def bow_train_features(datasets: list[tuple[str, int]]):
     for dataset in datasets:
         x = X[dataset[1]]
         x[0] += 1
-        for word in dataset[0].split(" "):
+        for word in dataset[0].split():
             x[bow[word]] += 1
 
     return (bow, X)
@@ -49,7 +49,7 @@ def bow_input_features(bow: dict[str, int], s: str):
     x = np.zeros(len(bow) + 1, dtype=np.intp)
     x[0] = 1
 
-    for word in s.split(" "):
+    for word in s.split():
         if word in bow:
             x[bow[word]] += 1
 
