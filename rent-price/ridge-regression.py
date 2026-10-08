@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import float64
 
-from .lib import Matrix, input_features, train_features, train_output
+from .lib import Matrix, input_features, train_expectations, train_features
 from .lib import datasets_with_noise as datasets
 
 
@@ -55,28 +55,29 @@ def select_regularization(
     ]
 
 
-X = train_features(datasets)
-# X -> log(Y)
-Y = np.log(train_output(datasets))
+if __name__ == "__main__":
+    X = train_features(datasets)
+    # X -> log(Y)
+    Y = np.log(train_expectations(datasets))
 
-w = train(
-    X,
-    Y,
-    select_regularization(
-        5, X, Y, np.array([0.01, 0.1, 1, 2, 5, 10, 100, 1000], dtype=float64)
-    ),
-)
-print("weights:", w)
-print("error:", np.exp(error(w, X, Y)))
+    w = train(
+        X,
+        Y,
+        select_regularization(
+            5, X, Y, np.array([0.01, 0.1, 1, 2, 5, 10, 100, 1000], dtype=float64)
+        ),
+    )
+    print("weights:", w)
+    print("error:", np.exp(error(w, X, Y)))
 
-print(
-    "predicted price:",
-    np.exp(
-        predict(
-            w,
-            input_features(
-                input("area (m^2): "), input("distance from city center (km): ")
-            ),
-        )
-    ),
-)
+    print(
+        "predicted price:",
+        np.exp(
+            predict(
+                w,
+                input_features(
+                    input("area (m^2): "), input("distance from city center (km): ")
+                ),
+            )
+        ),
+    )
