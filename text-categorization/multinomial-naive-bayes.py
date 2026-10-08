@@ -5,23 +5,23 @@ from .lib import bow_input_features, bow_train_features
 from .lib import simple_datasets as datasets
 
 
-def train(X: NDArray[np.intp], lsc: float = 1):
-    datasets_len = X[:, 0].sum()
-
+def train(X: NDArray[np.intp], lsp: float = 1):
     """
     # Parameters
     X[c] -> [n(c), ...n(x|c)]
-    datasets_len: dataset count
-    lsc: laplace smoothing parameter
+    lsp: laplace smoothing parameter
     """
-    w = np.zeros(X.shape, dtype=np.float64)
+
+    datasets_len = X[:, 0].sum()
     bow_size = X.shape[1] - 1
 
-    for i, x in enumerate(X):
-        w[i] = (x + lsc) / (np.sum(x[1:]) + bow_size * lsc)  # laplace smoothing
-        w[i, 0] = x[0] / datasets_len
+    W = np.zeros(X.shape, dtype=np.float64)
 
-    return np.log(w)
+    for i, x in enumerate(X):
+        W[i] = (x + lsp) / (np.sum(x[1:]) + bow_size * lsp)
+        W[i, 0] = x[0] / datasets_len
+
+    return np.log(W)
 
 
 def predict(w: NDArray[np.float64], x: NDArray[np.intp]):
@@ -36,5 +36,5 @@ if __name__ == "__main__":
     print("weights:", w)
 
     x = bow_input_features(bow, input("text: "))
-    print("input features:", x)
+    print("input features:", w)
     print("label:", predict(w, x))
