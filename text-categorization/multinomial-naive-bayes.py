@@ -24,8 +24,8 @@ def train(X: NDArray[np.intp], lsp: float = 1):
     return np.log(W)
 
 
-def predict(w: NDArray[np.float64], x: NDArray[np.intp]):
-    return np.argmax(w @ x)
+def predict(W: NDArray[np.float64], x: NDArray[np.intp]):
+    return np.argmax(W @ x)
 
 
 if __name__ == "__main__":
