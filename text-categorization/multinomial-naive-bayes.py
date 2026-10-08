@@ -36,5 +36,5 @@ if __name__ == "__main__":
     print("weights:", W)
 
     x = bow_input_features(bow, input("text: "))
-    print("input features:", W)
+    print("input features:", x)
     print("label:", predict(W, x))
