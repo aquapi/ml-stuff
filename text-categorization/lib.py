@@ -1,8 +1,4 @@
 import numpy as np
-from numpy import float64
-from numpy.typing import NDArray
-
-Matrix = NDArray[float64]
 
 simple_datasets = [
     ("hanoi pho chaolong hanoi", 0),
@@ -15,8 +11,9 @@ simple_datasets = [
 def bow_train_features(datasets: list[tuple[str, int]]):
     """
     # Returns
-    bow: map word to index in feature vector.
-    X: map labels to probabilities of each word.
+    bow[word] -> index in feature vector
+
+    X[c] -> [n(c), ...n(x|c)]
     """
     bow: dict[str, int] = {}
     bow_size = 0
@@ -32,7 +29,7 @@ def bow_train_features(datasets: list[tuple[str, int]]):
         max_label = max(max_label, dataset[1])
 
     # feature vectors: c -> [n(c), ...n(x[i]|c)]
-    X = np.zeros((max_label + 1, bow_size + 1), dtype=float64)
+    X = np.zeros((max_label + 1, bow_size + 1), dtype=np.intp)
 
     # count words of each label
     for dataset in datasets:
@@ -44,9 +41,12 @@ def bow_train_features(datasets: list[tuple[str, int]]):
     return (bow, X)
 
 
-# input feature: [1, ...words in BoW counts]
 def bow_input_features(bow: dict[str, int], s: str):
-    x = np.zeros(len(bow) + 1, dtype=float64)
+    """
+    # Returns
+    [1, ...BoW word counts]
+    """
+    x = np.zeros(len(bow) + 1, dtype=np.intp)
     x[0] = 1
 
     for word in s.split(" "):
