@@ -1,29 +1,39 @@
 import numpy as np
 from numpy import float64
 
-from .lib import Matrix, datasets, input_features, train_expectations, train_features
+from .lib import (
+    TInputFeatures,
+    TTrainExpectation,
+    TTrainFeatures,
+    datasets,
+    input_features,
+    train_expectations,
+    train_features,
+)
+
+TWeights = np.ndarray[tuple[int], np.dtype[np.float64]]
 
 
-def train(X: Matrix, Y: Matrix) -> Matrix:
-    return np.linalg.lstsq(X, Y)[0]
+def train(X: TTrainFeatures, y: TTrainExpectation) -> TWeights:
+    return np.linalg.lstsq(X, y)[0]
 
 
-def error(w: Matrix, X: Matrix, Y: Matrix) -> float64:
-    return np.mean((Y - X @ w) ** 2)
+def error(w: TWeights, X: TTrainFeatures, y: TTrainExpectation) -> float64:
+    return ((y - X @ w) ** 2).mean()
 
 
-def predict(w: Matrix, x: Matrix):
+def predict(w: TWeights, x: TInputFeatures):
     return x @ w
 
 
 if __name__ == "__main__":
     X = train_features(datasets)
-    # X -> log(Y)
-    Y = np.log(train_expectations(datasets))
+    # X -> log(y)
+    y = np.log(train_expectations(datasets))
 
-    w = train(X, Y)
+    w = train(X, y)
     print("weights:", w)
-    print("error:", np.exp(error(w, X, Y)))
+    print("error:", np.exp(error(w, X, y)))
 
     x = input_features(input("area (m^2): "), input("distance from city center (km): "))
     print("input features:", x)

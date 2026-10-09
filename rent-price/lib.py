@@ -1,12 +1,13 @@
 from typing import Any
 
 import numpy as np
-from numpy import float64
-from numpy.typing import NDArray
 
-Matrix = NDArray[float64]
+TDatasets = list[tuple[tuple[int, int], int]]
+TTrainFeatures = np.ndarray[tuple[int, int], np.dtype[np.float64]]
+TTrainExpectation = np.ndarray[tuple[int], np.dtype[np.float64]]
+TInputFeatures = np.ndarray[tuple[int], np.dtype[np.float64]]
 
-datasets = [
+datasets: TDatasets = [
     ((20, 5), 6),
     ((30, 4), 10),
     ((17, 6), 3),
@@ -41,8 +42,8 @@ datasets_with_noise.extend(
 )
 
 
-def train_features(datasets: list[Any]) -> Matrix:
-    X = np.array([float64(d[0]) for d in datasets])
+def train_features(datasets: TDatasets) -> TTrainFeatures:
+    X = np.array([d[0] for d in datasets], dtype=np.float64)
 
     areas = X[:, 0]
     distances = X[:, 1]
@@ -56,15 +57,15 @@ def train_features(datasets: list[Any]) -> Matrix:
     )
 
 
-def train_expectations(datasets: list[Any]) -> Matrix:
-    return np.array([float64(d[1]) for d in datasets])
+def train_expectations(datasets: TDatasets) -> TTrainExpectation:
+    return np.array([d[1] for d in datasets], dtype=np.float64)
 
 
-def input_features(area: Any, distance: Any) -> Matrix:
+def input_features(area: Any, distance: Any) -> TInputFeatures:
     return np.array(
         [
-            float64(1),  # intercept
-            float64(area),
-            float64(distance) ** 2,
+            np.float64(1),  # intercept
+            np.float64(area),
+            np.float64(distance) ** 2,
         ]
     )
